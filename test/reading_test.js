@@ -2,11 +2,15 @@ const assert = require('assert');
 const User = require('../src/user');
 
 describe('Reading users out of the database', () => {
-  let joe;
+  let joe, maria, alex, zach;
 
   beforeEach((done) => {
+    alex = new User({ name: 'alex'});
     joe = new User({ name: 'joe' });
-    joe.save()
+    maria = new User({ name: 'maria'});
+    zach = new User({ name: 'zach'});
+
+    Promise.all([joe.save(), alex.save(), maria.save(), zach.save()])
       .then(() => done());
   })
 
@@ -25,4 +29,17 @@ describe('Reading users out of the database', () => {
         done();
       });
   });
+
+  it('can skip and limit the result', (done) => {
+    User.find({})
+      .sort({ name: 1 })
+      .skip(1)
+      .limit(2)
+      .then((users) => {
+        assert(users.length === 2);
+        assert(users[0].name === joe.name);
+        assert(users[1].name === maria.name);
+        done();
+      })
+  })
 });
